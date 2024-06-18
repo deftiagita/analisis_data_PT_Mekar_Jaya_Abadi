@@ -1,0 +1,249 @@
+# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.preprocessing import StandardScaler
+
+# 2. Data Collection
+file_path = 'data_penjualan_PT_Mekar_Jaya_Abadi.csv'
+df = pd.read_csv(file_path)
+
+# 3. Data Cleaning
+# Checking for missing values
+print("Missing values in each column:\n", df.isnull().sum())
+
+# Filling or dropping missing values as necessary
+# For simplicity, let's assume no missing values in this example
+
+# 4. Data Transformation
+# Converting categorical data to numerical data using one-hot encoding
+df = pd.get_dummies(df, columns=['Produk', 'Jenis_Promosi', 'Kampanye_Pemasaran', 'Aktivitas_Kompetitor'], drop_first=True)
+
+# Feature scaling
+scaler = StandardScaler()
+numeric_features = ['Jumlah_Unit_Terjual', 'Harga_Per_Unit', 'Ketersediaan_Stok', 'Inflasi', 'Suku_Bunga', 'Tingkat_Pengangguran', 'Suhu', 'Curah_Hujan']
+df[numeric_features] = scaler.fit_transform(df[numeric_features])
+
+# 5. Exploratory Data Analysis (EDA)
+# Plotting sales trends over time
+plt.figure(figsize=(14, 7))
+df['Tanggal'] = pd.to_datetime(df['Tanggal'])
+df.set_index('Tanggal')['Total_Penjualan'].plot()
+plt.title('Sales Trends Over Time')
+plt.ylabel('Total Penjualan')
+plt.show()
+
+# Correlation matrix
+plt.figure(figsize=(12, 8))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+plt.title('Correlation Matrix')
+plt.show()
+
+# 6. Data Modeling
+# Preparing data for modeling
+X = df.drop(['Tanggal', 'Total_Penjualan'], axis=1)
+y = df['Total_Penjualan']
+
+# Splitting the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Training the model
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# 7. Model Validation and Tuning
+# Making predictions
+y_pred = model.predict(X_test)
+
+# Evaluating the model
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+
+print(f'MAE: {mae}')
+print(f'MSE: {mse}')
+print(f'RMSE: {rmse}')
+
+# Feature importance
+feature_importances = pd.DataFrame(model.feature_importances_, index=X_train.columns, columns=['importance']).sort_values('importance', ascending=False)
+print(feature_importances)
+
+# 8. Interpretation and Presentation of Results
+# Plotting feature importances
+plt.figure(figsize=(12, 6))
+sns.barplot(x=feature_importances.index, y=feature_importances['importance'])
+plt.title('Feature Importances')
+plt.xticks(rotation=90)
+plt.show()
+
+# 9. Deployment and Monitoring (simple example)
+# In a real-world scenario, this would involve deploying the model to a production environment
+# Here, we'll just simulate a prediction with new data
+
+# Simulating a new data prediction
+new_data = X_test.iloc[0].values.reshape(1, -1)
+predicted_sales = model.predict(new_data)
+print(f'Predicted sales for new data: {predicted_sales[0]}')
+
+# 10. Maintenance and Iteration
+# Regularly updating the model with new data and retraining
+# Monitoring model performance and making necessary adjustments
+
+# Additional steps may include:
+# - Creating automated pipelines for data processing and model training
+# - Setting up monitoring tools to track model performance in real-time
+# - Iteratively improving the model based on feedback and new data
+
+# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.preprocessing import StandardScaler
+from matplotlib_venn import venn2
+import warnings
+warnings.filterwarnings('ignore')
+
+# 2. Data Collection
+file_path = 'data_penjualan_PT_Mekar_Jaya_Abadi.csv'
+df = pd.read_csv(file_path)
+
+# 3. Data Cleaning
+# Checking for missing values
+print("Missing values in each column:\n", df.isnull().sum())
+
+# Filling or dropping missing values as necessary
+# For simplicity, let's assume no missing values in this example
+
+# 4. Data Transformation
+# Converting categorical data to numerical data using one-hot encoding
+df = pd.get_dummies(df, columns=['Produk', 'Jenis_Promosi', 'Kampanye_Pemasaran', 'Aktivitas_Kompetitor'], drop_first=True)
+
+# Feature scaling
+scaler = StandardScaler()
+numeric_features = ['Jumlah_Unit_Terjual', 'Harga_Per_Unit', 'Ketersediaan_Stok', 'Inflasi', 'Suku_Bunga', 'Tingkat_Pengangguran', 'Suhu', 'Curah_Hujan']
+df[numeric_features] = scaler.fit_transform(df[numeric_features])
+
+# 5. Exploratory Data Analysis (EDA)
+
+# Scatter plot
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='Jumlah_Unit_Terjual', y='Total_Penjualan', data=df)
+plt.title('Scatter Plot of Units Sold vs. Total Sales')
+plt.show()
+
+# Histogram
+plt.figure(figsize=(10, 6))
+df['Total_Penjualan'].hist(bins=30)
+plt.title('Histogram of Total Sales')
+plt.xlabel('Total Sales')
+plt.ylabel('Frequency')
+plt.show()
+
+# Pie chart
+produk_counts = df['Produk_A'].value_counts()  # Assuming 'Produk_A' is one of the dummy variables
+plt.figure(figsize=(8, 8))
+plt.pie(produk_counts, labels=produk_counts.index, autopct='%1.1f%%', startangle=140)
+plt.title('Pie Chart of Produk_A')
+plt.show()
+
+# Venn diagram
+# Assuming we have binary features to create a Venn diagram
+# For demonstration, let's assume two binary features 'Produk_A' and 'Jenis_Promosi_B'
+plt.figure(figsize=(8, 8))
+venn2(subsets=(df['Produk_A'].sum(), df['Jenis_Promosi_B'].sum(), (df['Produk_A'] & df['Jenis_Promosi_B']).sum()), 
+      set_labels=('Produk_A', 'Jenis_Promosi_B'))
+plt.title('Venn Diagram of Produk_A and Jenis_Promosi_B')
+plt.show()
+
+# Plotting sales trends over time
+plt.figure(figsize=(14, 7))
+df['Tanggal'] = pd.to_datetime(df['Tanggal'])
+df.set_index('Tanggal')['Total_Penjualan'].plot()
+plt.title('Sales Trends Over Time')
+plt.ylabel('Total Penjualan')
+plt.show()
+
+# Correlation matrix
+plt.figure(figsize=(12, 8))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+plt.title('Correlation Matrix')
+plt.show()
+
+# 6. Data Modeling
+# Preparing data for modeling
+X = df.drop(['Tanggal', 'Total_Penjualan'], axis=1)
+y = df['Total_Penjualan']
+
+# Splitting the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Training the model
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# 7. Model Validation and Tuning
+# Making predictions
+y_pred = model.predict(X_test)
+
+# Evaluating the model
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+
+print(f'MAE: {mae}')
+print(f'MSE: {mse}')
+print(f'RMSE: {rmse}')
+
+# Feature importance
+feature_importances = pd.DataFrame(model.feature_importances_, index=X_train.columns, columns=['importance']).sort_values('importance', ascending=False)
+print(feature_importances)
+
+# Linear Regression Analysis
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+y_pred_lr = lr_model.predict(X_test)
+
+plt.figure(figsize=(10, 6))
+plt.scatter(y_test, y_pred_lr, alpha=0.5)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Linear Regression: Actual vs Predicted')
+plt.show()
+
+# 8. Interpretation and Presentation of Results
+# Plotting feature importances
+plt.figure(figsize=(12, 6))
+sns.barplot(x=feature_importances.index, y=feature_importances['importance'])
+plt.title('Feature Importances')
+plt.xticks(rotation=90)
+plt.show()
+
+# 9. Deployment and Monitoring (simple example)
+# In a real-world scenario, this would involve deploying the model to a production environment
+# Here, we'll just simulate a prediction with new data
+
+# Simulating a new data prediction
+new_data = X_test.iloc[0].values.reshape(1, -1)
+predicted_sales = model.predict(new_data)
+print(f'Predicted sales for new data: {predicted_sales[0]}')
+
+# 10. Maintenance and Iteration
+# Regularly updating the model with new data and retraining
+# Monitoring model performance and making necessary adjustments
+
+# Additional steps may include:
+# - Creating automated pipelines for data processing and model training
+# - Setting up monitoring tools to track model performance in real-time
+# - Iteratively improving the model based on feedback and new data
+
+
